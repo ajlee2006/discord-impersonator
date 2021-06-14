@@ -14,7 +14,7 @@ urlregex = re.compile(
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
-    game = discord.Game("impersonate \"name\" \"message\"")
+    game = discord.Game("github.com/ajlee2006/discord-impersonator")
     await client.change_presence(status=discord.Status.online, activity=game)
 
 @client.event
