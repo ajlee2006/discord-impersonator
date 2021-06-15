@@ -17,7 +17,7 @@ async def on_ready():
     print('Logged in as {0.user}'.format(client))
     await client.change_presence(status=discord.Status.online, activity=discord.Game("github.com/ajlee2006/discord-impersonator"))
 
-@bot.command()
+@client.command()
 async def impersonate(ctx, *msg):
     print(msg)
     webhooks = await ctx.channel.webhooks()
