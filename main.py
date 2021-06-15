@@ -67,7 +67,12 @@ async def on_message(message):
                 colour = discord.Colour(int(msg[contentis+3]))
             embed = discord.Embed(title=msg[contentis+1], description=msg[contentis+2], colour=colour)
 
-        await webhook.send(content=content, username=username, avatar_url=avatar_url, embed=embed)
+        # attachments
+        files = None
+        if message.attachments != None and len(message.attachments) > 0:
+            files = [await i.to_file() for i in message.attachments]
+
+        await webhook.send(content=content, username=username, avatar_url=avatar_url, embed=embed, files=files)
 
         if msg[-1] == "delete":
             await message.delete()
