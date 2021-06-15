@@ -1,7 +1,8 @@
 import discord, re, shlex, os
 from discord.utils import get
+from discord.ext import commands
 
-client = discord.Client()
+client = commands.Bot(command_prefix='')
 
 urlregex = re.compile(
                 r'^(?:http|ftp)s?://' # http:// or https://
@@ -13,68 +14,62 @@ urlregex = re.compile(
 
 @client.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
-    game = discord.Game("github.com/ajlee2006/discord-impersonator")
-    await client.change_presence(status=discord.Status.online, activity=game)
+    print('Logged in as {0.user}'.format(client))
+    await client.change_presence(status=discord.Status.online, activity=discord.Game("github.com/ajlee2006/discord-impersonator"))
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
+@bot.command()
+async def impersonate(ctx, *msg):
+    print(msg)
+    webhooks = await ctx.channel.webhooks()
+    print(len(webhooks))
 
-    if message.content.startswith('impersonate '):
-        msg = shlex.split(message.content[12:])
-        print(msg)
-        webhooks = await message.channel.webhooks()
-        print(len(webhooks))
+    webhook = None
+    for awebhook in webhooks:
+        if awebhook.name == "impersonator":
+            webhook = awebhook
+    if webhook == None:
+        webhook = await ctx.channel.create_webhook(name="impersonator")
 
-        webhook = None
-        for awebhook in webhooks:
-            if awebhook.name == "impersonator":
-                webhook = awebhook
+    username = msg[0]
+    avatar_url = None
+    content = msg[1]
+    embed = None
 
-        webhook = await message.channel.create_webhook(name="impersonator")
+    contentis = 1
 
-        username = msg[0]
-        avatar_url = None
-        content = msg[1]
-        embed = None
+    if re.match('<@!?[0-9]+>',username):
+        userid = int(re.search('<@!?([0-9]+)>',msg[0]).group(1))
+        print(userid)
+        userpinged = await ctx.guild.query_members(user_ids=[userid])
+        userpinged = userpinged[0]
+        print(userpinged)
+        username = userpinged.nick
+        print(userpinged.nick)
+        if username == None:
+            username = userpinged.name
+            print(userpinged.name)
+        avatar_url = userpinged.avatar_url
 
-        contentis = 1
+    if re.match(urlregex, content.strip()) is not None:
+        avatar_url = content
+        content = msg[2]
+        contentis = 2
 
-        if re.match('<@!?[0-9]+>',username):
-            userid = int(re.search('<@!?([0-9]+)>',msg[0]).group(1))
-            print(userid)
-            userpinged = await message.guild.query_members(user_ids=[userid])
-            userpinged = userpinged[0]
-            print(userpinged)
-            username = userpinged.nick
-            print(userpinged.nick)
-            if username == None:
-                username = userpinged.name
-                print(userpinged.name)
-            avatar_url = userpinged.avatar_url
+    if content == "embed":
+        content = ""
+        colour = discord.Colour.blurple()
+        if len(msg) > contentis+3 and msg[contentis+3].isdigit() and int(msg[contentis+3]) < 16777216:
+            colour = discord.Colour(int(msg[contentis+3]))
+        embed = discord.Embed(title=msg[contentis+1], description=msg[contentis+2], colour=colour)
 
-        if re.match(urlregex, content.strip()) is not None:
-            avatar_url = content
-            content = msg[2]
-            contentis = 2
+    # attachments
+    files = None
+    if ctx.message.attachments != None and len(ctx.message.attachments) > 0:
+        files = [await i.to_file() for i in ctx.message.attachments]
 
-        if content == "embed":
-            content = ""
-            colour = discord.Colour.blurple()
-            if len(msg) > contentis+3 and msg[contentis+3].isdigit() and int(msg[contentis+3]) < 16777216:
-                colour = discord.Colour(int(msg[contentis+3]))
-            embed = discord.Embed(title=msg[contentis+1], description=msg[contentis+2], colour=colour)
+    await webhook.send(content=content, username=username, avatar_url=avatar_url, embed=embed, files=files)
 
-        # attachments
-        files = None
-        if message.attachments != None and len(message.attachments) > 0:
-            files = [await i.to_file() for i in message.attachments]
-
-        await webhook.send(content=content, username=username, avatar_url=avatar_url, embed=embed, files=files)
-
-        if msg[-1] == "delete":
-            await message.delete()
+    if msg[-1] == "delete":
+        await ctx.message.delete()
 
 client.run(os.environ.get('BOT_TOKEN'))
