@@ -1,5 +1,6 @@
-import discord, re, shlex, os
-from discord.utils import get
+import re
+import os
+import discord
 from discord.ext import commands
 
 client = commands.Bot(command_prefix='')
@@ -15,7 +16,8 @@ urlregex = re.compile(
 @client.event
 async def on_ready():
     print('Logged in as {0.user}'.format(client))
-    await client.change_presence(status=discord.Status.online, activity=discord.Game("github.com/ajlee2006/discord-impersonator"))
+    await client.change_presence(status=discord.Status.online,
+        activity=discord.Game("github.com/ajlee2006/discord-impersonator"))
 
 @client.command(aliases = ["impersonator"])
 async def impersonate(ctx, *msg):
@@ -27,7 +29,7 @@ async def impersonate(ctx, *msg):
     for awebhook in webhooks:
         if awebhook.name == "impersonator":
             webhook = awebhook
-    if webhook == None:
+    if webhook is None:
         webhook = await ctx.channel.create_webhook(name="impersonator")
 
     username = msg[0]
@@ -45,7 +47,7 @@ async def impersonate(ctx, *msg):
         print(userpinged)
         username = userpinged.nick
         print(userpinged.nick)
-        if username == None:
+        if username is None:
             username = userpinged.name
             print(userpinged.name)
         avatar_url = userpinged.avatar_url
@@ -64,10 +66,11 @@ async def impersonate(ctx, *msg):
 
     # attachments
     files = None
-    if ctx.message.attachments != None and len(ctx.message.attachments) > 0:
+    if ctx.message.attachments is not None and len(ctx.message.attachments) > 0:
         files = [await i.to_file() for i in ctx.message.attachments]
 
-    await webhook.send(content=content, username=username, avatar_url=avatar_url, embed=embed, files=files)
+    await webhook.send(content=content, username=username,
+        avatar_url=avatar_url, embed=embed, files=files)
 
     if msg[-1] == "delete":
         await ctx.message.delete()
