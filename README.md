@@ -1,20 +1,20 @@
 # impersonator
 
+### Update: an instance of this bot that I used to run is now down, because the feature has been integrated into [AndewBot](https://github.com/ajlee2006/discord-andewbot). However, I shall leave this code here for anyone who wants to run it on their own.
+
 A bot that uses webhooks to pretend to be someone else, matching their username and profile picture. Big drawbacks - there is always "BOT" next to the username, and the colour of the username cannot be matched.
 
-An instance is currently running off this source code on Heroku. **[Invite link](https://discord.com/api/oauth2/authorize?client_id=853267048679211009&permissions=2751982656&scope=bot)**
-
-### Usage
+## Usage
 Multi-word fields must be enclosed with single or double quotes.
-#### Impersonating with custom nickname 
+### Impersonating with custom nickname 
 ```
 impersonate [nickname] [optional avatar image url] [message]
 ```
-#### Impersonating a user
+### Impersonating a user
 ```
 impersonate [@mention] [message]
 ```
-#### Sending embeds
+### Sending embeds
 Replace `[message]` with `embed [title] [description] [optional colour (rgb int)]`
-#### Auto-delete message
+### Auto-delete message
 Append `delete` at the end of a message.
